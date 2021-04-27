@@ -1,0 +1,34 @@
+{
+  "name": "seas-of-beauty",
+  "version": "1.0.0",
+  "description": "Phaser 3 Game for 120 ",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "parcel serve index.html",
+    "build": "parcel build --public-url . index.html",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "push-gh-pages": "readline \"readline\";push-dir --dir=dist --branch=gh-pages --cleanup --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KW-M/Rocket-Patrol.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KW-M/Rocket-Patrol/issues"
+  },
+  "homepage": "https://github.com/KW-M/Rocket-Patrol#readme",
+  "dependencies": {
+    "lockr": "^0.8.5",
+    "phaser": "^3.54.0"
+  },
+  "devDependencies": {
+    "@parcel/transformer-image": "^2.0.0-nightly.2267",
+    "cssnano": "^5.0.0",
+    "parcel": "^2.0.0-nightly.389",
+    "postcss": "^8.2.10"
+  }
+}

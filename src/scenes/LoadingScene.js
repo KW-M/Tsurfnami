@@ -1,4 +1,23 @@
-class LoadingScene extends Phaser.Scene {
+import Phaser from 'phaser'
+
+import images_starfield from 'url:/assets/starfield.png';
+import images_hook from 'url:/assets/hook.png';
+import images_key_bg from 'url:/assets/Key_BG.png';
+import images_wood_crash from 'url:/assets/wood_crash.png';
+import images_mantaray from 'url:/assets/manta_anim.png';
+import images_boat from 'url:/assets/boat_anim.png';
+import images_wave from 'url:/assets/wave_foreground.png';
+import images_wave_bg from 'url:/assets/wave_bg.png';
+import images_surfer from 'url:/assets/surfboard.png'
+import images_ocean_tile from 'url:/assets/ocean_tile.png';
+import images_explosion from 'url:/assets/explosion.png';
+import images_rocket from 'url:/assets/rocket.png';
+
+import sounds_explosion38 from 'url:/assets/explosion38.wav';
+import sounds_rocket_shot from 'url:/assets/rocket_shot.wav';
+import sounds_soundtrack from 'url:/assets/The_Spyprobe_-_Oceanforms.mp3';
+
+export default class LoadingScene extends Phaser.Scene {
     constructor() {
       super({ key: 'loadingScene' });
     }
@@ -7,27 +26,30 @@ class LoadingScene extends Phaser.Scene {
       var bg = this.add.rectangle(this.game.config.width / 2, this.game.config.height / 2, 400, 30, 0x666666).setOrigin(0.5, 0.5);
       var bar = this.add.rectangle(bg.x, bg.y, bg.width, bg.height, 0xffffff).setScale(0, 1).setOrigin(0.5, 0.5);
 
-      this.load.image('wave', './assets/waves_anim.png');// { frameWidth: 64, frameHeight: 4, startFrame: 0, endFrame: 9 };
-      this.load.image('wave_background', './assets/ocean_gradient.png');// { frameWidth: 64, frameHeight: 4, startFrame: 0, endFrame: 9 };
-      this.load.image('ocean_tile', './assets/ocean_tile.png');
-      this.load.image('starfield', './assets/starfield.png');
-      this.load.image('surfer', './assets/surfboard.png');
-      this.load.image('rocket','./assets/rocket.png',);
-      this.load.image('spaceshipfast','./assets/spaceship fast.png',);
+      this.load.image('key_bg', images_key_bg);
+      this.load.image('wave_foreground', images_wave);// { frameWidth: 64, frameHeight: 4, startFrame: 0, endFrame: 9 };
+      this.load.image('wave_background', images_wave_bg);
+      this.load.image('ocean_tile', images_ocean_tile);
+      this.load.image('starfield', images_starfield);
+      this.load.image('surfer', images_surfer);
+
+      // Obstacle Images:
+      this.load.image('hook', images_hook);
+      this.load.spritesheet('wood_crash', images_wood_crash,
+        { frameWidth: 120, frameHeight: 120, startFrame: 0, endFrame: 5 });
+      this.load.image('rocket', images_rocket);
 
       // load spritesheets
-      this.load.spritesheet('spaceship','./assets/spaceship.png',
-      {frameWidth: 63, frameHeight: 46, startFrame: 0, endFrame: 4});
-      this.load.spritesheet('explosion', './assets/explosion.png',
+      this.load.spritesheet('explosion', images_explosion,
       {frameWidth: 50, frameHeight: 50, startFrame: 0, endFrame: 6});
-      this.load.spritesheet('manta', './assets/manta_anim.png',
+      this.load.spritesheet('shark', images_mantaray,
       { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 10 });
-      this.load.spritesheet('boat', './assets/boat_anim.png',
+      this.load.spritesheet('boat', images_boat,
       { frameWidth: 64, frameHeight: 48, startFrame: 0, endFrame: 9 });
 
-      // this.load.audio('sfx_explosion', sounds_explosion38);
-      // this.load.audio('sfx_rocket', sounds_rocket_shot);
-      this.load.audio('soundtrack', './assets/The_Spyprobe_-_Oceanforms.mp3');
+      this.load.audio('sfx_explosion', sounds_explosion38);
+      this.load.audio('sfx_rocket', sounds_rocket_shot);
+      this.load.audio('soundtrack', sounds_soundtrack);
 
       this.load.on('progress', function (progress) {
         bar.setScale(progress, 1);

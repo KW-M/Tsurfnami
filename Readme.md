@@ -1,21 +1,22 @@
-# Seas of Beauty
+# Tsurfnami
 
-A small game I made for the CMPM 120 series at UCSC
+A small game made by Ascher Lac, Kelly, Yukai Liu, and Kyle Worcester-Moore for the CMPM 120 series at UCSC:
 
-Play the [live game](https://kw-m.github.io/Seas-of-Beauty)!
+Play the [live game](https://kw-m.github.io/Tsurfnami) online!
 
-This work is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html)
-
-![](https://www.gnu.org/graphics/gplv3-or-later.png)
+## Building the game in development:
+1. Get Node.JS from: https://nodejs.org/en/download
+2. Get this source code by typing `git clone https://github.com/KW-M/Tsurfnami.git` into your terminal/cmd prompt
+3. `cd ./Tsurfnami` to get into the Tsurfnami folder.
+4. run `npm install` in the terminal to install dependancies (JS libraries)
+5. Whenever you want to run the game code, type `npm run start` in the terminal and it should build the project with parcel 2, and start a development server.
 
 ## Tools Used:
 - Phaser 3
 - Parcel 2
 - Piskel
-- GunDB
-## Asset Credits:
- - Background music (Creative Commons): https://www.jamendo.com/track/970793/oceanforms by THE SPYPROBE
- - Bag sprites (Creative Commons): https://pixabay.com/illustrations/plastic-plastic-bag-plastic-bags-5557360/
- - Tire sprite (Creative Commons): https://thenounproject.com/term/tire/26853/
- - Bottle sprite (Creative Commons): https://commons.wikimedia.org/wiki/File:Welcon_Product_Overview.png
+
+This work is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
+![](https://www.gnu.org/graphics/gplv3-or-later.png)
 

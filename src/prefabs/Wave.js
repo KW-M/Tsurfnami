@@ -1,28 +1,28 @@
-class Wave extends Phaser.GameObjects.TileSprite {
+export default class Wave extends Phaser.GameObjects.TileSprite {
     constructor(scene) {
-        super(scene, scene.gameSize.width / 3, 0,8, scene.gameSize.height, "wave");
+        super(scene, scene.gameSize.width / 3, 0, 152, scene.gameSize.height, "wave_background")
         scene.add.existing(this);   // add to existing scene
-        this.setOrigin(0, 0)
+        this.setOrigin(0.5, 0)
         this.origninalX = scene.gameSize.width / 3
-        // this.anims.play('wave_anim');
-
-        this.waveShade = this.scene.add.tileSprite(0, 0, this.origninalX *2,this.scene.gameSize.height *2,'wave_background')
-        this.waveShade.setAlpha(0.5)
-
     }
-    create() {
-
+    addForground() {
+        this.waveForeground = this.scene.add.tileSprite(this.origninalX, 0, 152, this.scene.gameSize.height, 'wave_foreground').setOrigin(0.5, 0)
+        this.waveShade = this.scene.add.rectangle(0, 0, this.origninalX, this.scene.gameSize.height, 0x00b0ff).setOrigin(0, 0)
+        this.waveShade.setAlpha(0.7)
     }
 
-    update() {
+    update(frameNum) {
         // Move Wave Forwards & Backwards
-        this.x = this.origninalX + Math.sin(Date.now() / 4000) * 30;
-        this.tilePositionY += 65
-        this.waveShade.width = this.x * 2;
+        this.x = this.origninalX + Math.sin(Math.sin(frameNum / 700) * 30) * 100;
+        if (frameNum % 2 == 0) this.waveForeground.tilePositionY += 128
+        this.waveForeground.x = this.x;
+        this.waveShade.width = this.x - 18;
     }
 
     resize() {
-        this.waveShade.height = this.scene.gameSize.height * 2
+        this.height = this.scene.gameSize.height;
+        this.waveForeground.height = this.scene.gameSize.height;
+        this.waveShade.height = this.scene.gameSize.height
         this.origninalX = this.scene.gameSize.width / 3
     }
 

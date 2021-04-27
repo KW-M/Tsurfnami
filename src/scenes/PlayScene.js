@@ -1,71 +1,91 @@
-class PlayScene extends Phaser.Scene {
+import Phaser from 'phaser'
+import ScoreOverlay from "/src/prefabs/scoreOverlay"
+import Obstacle from "/src/prefabs/obstacle"
+import Surfer from "/src/prefabs/Surfer"
+import Wave from "/src/prefabs/Wave"
+
+export default class PlayScene extends Phaser.Scene {
     constructor() {
         super({ key: "playScene" });
     }
 
-
     create() {
         this.gameSize = this.game.scale.gameSize;
+        this.matter.set30Hz();
+
         // setup variables
-        this.game.worldSpeed = 3
+        this.game.worldSpeed = 10
         this.doomLevel = 0;
 
         // define keys
-        keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-        keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-        keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-        keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-        keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        window.keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        window.keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        window.keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+        window.keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+        window.keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        window.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 
         let music = this.sound.add('soundtrack', { loop: true });
         // music.play();
 
         // place background tile sprite
         this.oceanBackground = this.add.tileSprite(0, 0, this.gameSize.width, this.gameSize.height, 'ocean_tile').setOrigin(0, 0);
-        this.oceanBackground.setAlpha(0.5)
+        this.oceanBackground.setAlpha(0.6);
+        this.wave = new Wave(this, this.gameSize.width / 3, this.gameSize.height);
 
         // place obstacles
         this.obstacleGameObjects = [
-            new Obstacle(this, 10, 'spaceshipfast', 'coconut').reset(Math.random()*this.gameSize.height),
-            new Obstacle(this, 10, 'spaceshipfast', 'coconut').reset(Math.random()*this.gameSize.height)
+            new Obstacle(this, 10, 'hook', 'hook').reset(Math.random() * this.gameSize.height),
+            new Obstacle(this, 10, 'wood_crash', 'wood').reset(Math.random() * this.gameSize.height)
         ]
-
+        // this.oceanBG = this.add.renderTexture(0, 0, this.gameSize.width, this.gameSize.height)
         // add player and wave
-        this.player = new Surfer(this, this.gameSize.width / 3, this.gameSize);
-        this.wave = new Wave(this, this.gameSize.width / 3, this.gameSize);
-        this.wave.create(this.gameSize)
+        this.player = new Surfer(this, this.gameSize.width, this.gameSize.height / 2);
+        this.wave.addForground();
 
-        // //explosion animation
-        // this.anims.create({
-        //     key: 'explosion',
-        //     frames: this.anims.generateFrameNumbers('explosion',
-        //         { start: 0, end: 6, first: 0 }),
-        //     frameRate: 30
-        // });
+        this.player.setOnCollide((event) => {
+            if ("vibrate" in window.navigator) {
+                window.navigator.vibrate(100);
+            }
+            this.scoreOverlay.incrementDoomLevel(-5)
+            console.log("colision!", event.bodyA.label)
+            this.player.collidingWith = event.bodyA.label;
+            this.destroyObstacle(event.bodyA.label)
+        })
+        this.player.setOnCollideEnd((event) => {
+            console.log("colision end!", event.bodyA.label, "Last collding with: " + this.player.collidingWith)
+            if (event.bodyA.label == this.player.collidingWith)
+                this.player.collidingWith = null;
+        })
+
+        //explosion animation
+        this.anims.create({
+            key: 'explosion',
+            frames: this.anims.generateFrameNumbers('explosion',
+                { start: 0, end: 6, first: 0 }),
+            frameRate: 30
+        });
 
         // //spaceship aimation
-        // this.anims.create({
-        //     key: 'spaceship',
-        //     frames: this.anims.generateFrameNumbers('spaceship',
-        //         { start: 0, end: 3, first: 0 }),
-        //     frameRate: 20,
-        //     repeat: Infinity
-        // });
-
+        this.anims.create({
+            key: 'crash',
+            frames: this.anims.generateFrameNumbers('wood_crash',
+                { start: 0, end: 5, first: 0 }),
+            frameRate: 20,
+            repeat: 0
+        });
 
         // high score is saved across games played
         this.hScore = localStorage.getItem("score") || 0;
 
         // GAME OVER flag
         this.gameOver = false;
-
         this.scoreOverlay = new ScoreOverlay(this)
 
         this.scale.on('resize', (gameSize, baseSize, displaySize, resolution) => {
             this.gameSize = gameSize;
-            this.wave.height = this.gameSize.height
             this.wave.resize(gameSize)
+            this.scoreOverlay.resize(gameSize)
             this.oceanBackground.height = this.gameSize.height
             this.oceanBackground.width = this.gameSize.width;
         })
@@ -73,33 +93,45 @@ class PlayScene extends Phaser.Scene {
     }
 
     showGameOver() {
-        this.add.text(game.config.width / 2, game.config.height / 2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-        this.add.text(game.config.width / 2, game.config.height / 2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5);
-        // // scores display configuration
-        // let scoreConfig =
-        // {
-        //     fontFamily: "Courier",
-        //     fontSize: "20px",
-        //     backgroundColor: "#f3b141",
-        //     color: "#843605",
-        //     align: "left",
-        //     padding: { top: 5, bottom: 5 },
-        //     fixedWidth: 150
-        // };
-        // this.scoreLeft = this.add.text
-        //     (
-        //         50, // x-coord
-        //         54, // y-coord
-        //         "Score: " + this.p1Score, // initial text
-        //         scoreConfig // config settings
-        //     );
-        // this.best = this.add.text
-        //     (
-        //         225, // x-coord
-        //         54, // y coord
-        //         "Best: " + this.hScore, // initial text
-        //         scoreConfig // config settings
-        //     );
+        this.gameOver = true;
+        this.time.removeAllEvents();
+        // scores display configuration
+        let scoreConfig = {
+            fontFamily: "Courier",
+            fontSize: "40px",
+            backgroundColor: "#f3b141",
+            color: "#843605",
+            align: "left",
+            padding: { top: 20, bottom: 20, left: 20, right: 20 },
+        };
+        let score = this.scoreOverlay.clock
+        this.add.text(this.gameSize.width / 2, this.gameSize.height / 2, 'GAME OVER', scoreConfig).setOrigin(0.5);
+        this.add.text(this.gameSize.width / 2, this.gameSize.height / 2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5);
+
+
+
+
+        this.scoreLeft = this.add.text
+            (
+                this.gameSize.width / 2, // x-coord
+                54, // y-coord
+                "Score: " + score, // initial text
+                scoreConfig // config settings
+            ).setOrigin(0.5, 0);
+
+        this.best = this.add.text
+            (
+                this.gameSize.width / 2, // x-coord
+                108, // y coord
+                "Best: " + this.hScore, // initial text
+                scoreConfig // config settings
+            ).setOrigin(0.5, 0);
+        // // update the high score
+        if (score > this.hScore) {
+            this.hScore = score;
+            localStorage.setItem("score", this.hScore);
+            this.best.text = "Best: " + this.hScore;
+        }
     }
 
     update() {
@@ -111,63 +143,62 @@ class PlayScene extends Phaser.Scene {
         }
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene");
+            this.scene.remove();
         }
 
         // when game is over remove the game clock event
         if (this.gameOver) {
-            this.time.removeAllEvents();
-            this.showGameOver();
+            return;
         } else {
-            this.player.update();  // update surfer sprite
-            this.wave.update();
+            this.wave.update(this.game.loop.frame);
+            this.player.update(this.wave.x);  // update surfer sprite
+            if (this.player.x < -8) this.showGameOver();
             // update all obstacle sprites:
             for (let i = 0; i < this.obstacleGameObjects.length; i++) {
                 let obstacle = this.obstacleGameObjects[i];
                 obstacle.update(this.game.worldSpeed);
-                if(obstacle.done == true) obstacle.reset();
+                if (obstacle.x + 10 > this.wave.x) {
+                    obstacle.destroyed = true;
+                    obstacle.anims.play('crash');
+                }
+                if (obstacle.done == true) obstacle.reset(Math.random() * this.gameSize.height);
             }
+            this.scoreOverlay.incrementDoomLevel(0.4 / Math.abs(this.wave.x - this.player.x))
         }
     }
 
+    destroyObstacle(label) {
+        for (let i = 0; i < this.obstacleGameObjects.length; i++) {
+            let obstacle = this.obstacleGameObjects[i];
+            if (obstacle.body.label == label && obstacle.destroyed == false) {
+                obstacle.destroyed = true;
+                obstacle.anims.play('crash');
 
-    // checkCollision(rocket, ship) {
-    //     if (rocket.x < ship.x + ship.width &&
-    //         rocket.x + rocket.width > ship.x &&
-    //         rocket.y < ship.y + ship.height &&
-    //         rocket.height + rocket.y > ship.y) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
+                // obstacle.body.se
+                obstacle.on('animationcomplete', () => {    // callback after anim completes
+                    obstacle.reset();                         // reset ship position
+                });
+                this.sound.play('sfx_explosion');
+            }
+        }
+        // // temporarily hide ship
+        // ship.alpha = 0;
+        // // create explosion sprite at ship's position
+        // obstacle.anims.play('explosion');             // play explode animation
+        // boom.on('animationcomplete', () => {    // callback after anim completes
+        //     ship.reset();                         // reset ship position
+        //     ship.alpha = 1;                       // make ship visible again
+        //     boom.destroy();                       // remove explosion sprite
+        // });
+        // // score add and repaint
+        // this.p1Score += 1;
+        // this.scoreLeft.text = this.p1Score;
 
-    // }
+        // this.scoreLeft.text = "Score: " + this.p1Score;
 
-    // shipExplode(ship) {
-    //     // temporarily hide ship
-    //     ship.alpha = 0;
-    //     // create explosion sprite at ship's position
-    //     let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0);
-    //     boom.anims.play('explosion');             // play explode animation
-    //     boom.on('animationcomplete', () => {    // callback after anim completes
-    //         ship.reset();                         // reset ship position
-    //         ship.alpha = 1;                       // make ship visible again
-    //         boom.destroy();                       // remove explosion sprite
-    //     });
-    //     // score add and repaint
-    //     this.p1Score += 1;
-    //     this.scoreLeft.text = this.p1Score;
 
-    //     // update the high score
-    //     if (this.p1Score > this.hScore) {
-    //         this.hScore = this.p1Score;
-    //         localStorage.setItem("score", this.hScore);
-    //         this.best.text = "Best: " + this.hScore;
-    //     }
-    //     this.scoreLeft.text = "Score: " + this.p1Score;
 
-    //     this.sound.play('sfx_explosion');
-
-    // }
+    }
 
 
 
