@@ -61,7 +61,7 @@ export default class ScoreOverlay extends Phaser.GameObjects.GameObject {
     incrementDoomLevel(doomLevelInc) {
         this.doomLevel += doomLevelInc;
         this.doomLevel = Phaser.Math.Clamp(this.doomLevel, 1, 100);
-        this.doomText.text = "DOOM: " + Math.floor(this.doomLevel) + "/100"
+        this.doomText.text = "DOOM: " + Math.floor(this.doomLevel) + "/100" + "Sppeeeed: " + 25 * Math.log(this.doomLevel + 1);
         this.resize(this.scene.gameSize)
     }
 

@@ -8,7 +8,7 @@ let scoreConfig = {
     fixedWidth: 50
 };
 
-export default export default class KeyTut extends Phaser.GameObjects.Image {
+export default class KeyTut extends Phaser.GameObjects.Image {
     constructor(scene, x, y, label) {
         super(scene, x, y, 'key_bg')
         scene.add.existing(this);

@@ -1,17 +1,18 @@
 import Phaser from 'phaser'
 
-import images_starfield from 'url:/assets/starfield.png';
-import images_hook from 'url:/assets/hook.png';
 import images_key_bg from 'url:/assets/Key_BG.png';
+import images_hook from 'url:/assets/hook.png';
+import images_coconut_crash from 'url:/assets/coconut_crash.png';
 import images_wood_crash from 'url:/assets/wood_crash.png';
+import images_explosion from 'url:/assets/explosion.png';
+import images_rocket from 'url:/assets/rocket.png';
 import images_mantaray from 'url:/assets/manta_anim.png';
 import images_boat from 'url:/assets/boat_anim.png';
 import images_wave from 'url:/assets/wave_foreground.png';
 import images_wave_bg from 'url:/assets/wave_bg.png';
-import images_surfer from 'url:/assets/surfboard.png'
-import images_ocean_tile from 'url:/assets/ocean_tile.png';
-import images_explosion from 'url:/assets/explosion.png';
-import images_rocket from 'url:/assets/rocket.png';
+import images_surfer from 'url:/assets/surfer_sm.png'
+import images_ocean_tile from 'url:/assets/ocean tile.png';
+
 
 import sounds_explosion38 from 'url:/assets/explosion38.wav';
 import sounds_rocket_shot from 'url:/assets/rocket_shot.wav';
@@ -30,22 +31,27 @@ export default class LoadingScene extends Phaser.Scene {
       this.load.image('wave_foreground', images_wave);// { frameWidth: 64, frameHeight: 4, startFrame: 0, endFrame: 9 };
       this.load.image('wave_background', images_wave_bg);
       this.load.image('ocean_tile', images_ocean_tile);
-      this.load.image('starfield', images_starfield);
-      this.load.image('surfer', images_surfer);
 
       // Obstacle Images:
       this.load.image('hook', images_hook);
+      this.load.image('rocket', images_rocket);
       this.load.spritesheet('wood_crash', images_wood_crash,
         { frameWidth: 120, frameHeight: 120, startFrame: 0, endFrame: 5 });
-      this.load.image('rocket', images_rocket);
+      this.load.spritesheet('coconut_crash', images_coconut_crash,
+        { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 5 });
+      this.load.spritesheet('rock_crash', images_coconut_crash,
+        { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 5 });
+      this.load.spritesheet('boat', images_boat,
+        { frameWidth: 64, frameHeight: 48, startFrame: 0, endFrame: 9 });
+      this.load.spritesheet('surfer', images_surfer,
+        { frameWidth: 120, frameHeight: 120, startFrame: 0, endFrame: 3 });
 
       // load spritesheets
       this.load.spritesheet('explosion', images_explosion,
       {frameWidth: 50, frameHeight: 50, startFrame: 0, endFrame: 6});
-      this.load.spritesheet('shark', images_mantaray,
+      this.load.spritesheet('manta', images_mantaray,
       { frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 10 });
-      this.load.spritesheet('boat', images_boat,
-      { frameWidth: 64, frameHeight: 48, startFrame: 0, endFrame: 9 });
+
 
       this.load.audio('sfx_explosion', sounds_explosion38);
       this.load.audio('sfx_rocket', sounds_rocket_shot);

@@ -8,16 +8,18 @@ export default class Surfer extends Phaser.Physics.Matter.Sprite {
             }
         );
         scene.add.existing(this);   // add to existing scene
-        this.setRectangle(25, 100);
+        this.setRectangle(75, 20);
         this.setFixedRotation(true);
         this.setSensor(true);
         this.setFriction(1)
+        this.anims.play('surfer_idle_anim')
+        this.setOrigin(0.65, 0.7)
         // var spriteBody = Phaser.Physics.Matter.PhysicsJSONParser.rectangle(0, 0, 25, 100)
         // this.setExistingBody(spriteBody)
 
         this.collidingWith = null;
         this.movementSpeed = 5;
-        this.targetLocationX = x
+        this.targetLocationX = this.scene.gameSize.width;
         this.targetLocationY = y
         // this.sfxRocket = scene.sound.add('sfx_rocket'); // add rocket sfx
 
@@ -67,11 +69,25 @@ export default class Surfer extends Phaser.Physics.Matter.Sprite {
         }
 
         let xDelta = Phaser.Math.Clamp(this.targetLocationX - this.x, 0, 100)
-        let yDelta = Phaser.Math.Clamp(this.targetLocationY - this.y, -this.movementSpeed, this.movementSpeed)
+        let yDelta = Phaser.Math.Clamp((this.targetLocationY - this.y) / 50, -this.movementSpeed, this.movementSpeed)
+
+        // change surfer direction angle
+        this.setAngle(yDelta * 1.5)
+        // if (yDelta > 0.5)
+        //     this.setAngle(10)
+        // else if (yDelta < -0.5)
+        //     this.setAngle(-10)
+        // else {
+        //     console.log(yDelta)
+        //     this.setAngle(0)
+        // }
+
         forceX += xDelta * 0.00008;
         forceY += yDelta * 0.0008;
         if (this.collidingWith != null) forceX -= 0.1;
         this.applyForce(new Phaser.Math.Vector2(forceX, forceY))
+
+
 
         // jump button
         if ((this.scene.input.activePointer.leftButtonReleased() || Phaser.Input.Keyboard.JustDown(keySPACE)) && !this.isJumping) {

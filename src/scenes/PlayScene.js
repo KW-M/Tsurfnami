@@ -35,16 +35,25 @@ export default class PlayScene extends Phaser.Scene {
 
         // place obstacles
         this.obstacleGameObjects = [
-            new Obstacle(this, 10, 'hook', 'hook').reset(Math.random() * this.gameSize.height),
-            new Obstacle(this, 10, 'wood_crash', 'wood').reset(Math.random() * this.gameSize.height)
+            new Obstacle(this, 10, 'coconut_crash', 'coconut0'),
+            new Obstacle(this, 10, 'wood_crash', 'wood0'),
+            new Obstacle(this, 10, 'coconut_crash', 'coconut1'),
+            new Obstacle(this, 10, 'boat', 'boat1'),
+            new Obstacle(this, 10, 'wood_crash', 'wood1'),
+            new Obstacle(this, 10, 'hook', 'hook3'),
         ]
-        // this.oceanBG = this.add.renderTexture(0, 0, this.gameSize.width, this.gameSize.height)
+        for (let i = 0; i < this.obstacleGameObjects.length; i++) {
+            setTimeout(() => {
+                this.obstacleGameObjects[i].reset(Math.random() * this.gameSize.height)
+            }, i * 1000);
+        }
+
         // add player and wave
-        this.player = new Surfer(this, this.gameSize.width, this.gameSize.height / 2);
+        this.player = new Surfer(this, this.wave.x + 90, this.gameSize.height / 2);
         this.wave.addForground();
 
         this.player.setOnCollide((event) => {
-            if ("vibrate" in window.navigator) {
+            if ("vibrate" in window.navigator && window.navigator.vibrate != undefined) {
                 window.navigator.vibrate(100);
             }
             this.scoreOverlay.incrementDoomLevel(-5)
@@ -58,17 +67,31 @@ export default class PlayScene extends Phaser.Scene {
                 this.player.collidingWith = null;
         })
 
-        //explosion animation
+        //surfer animation
         this.anims.create({
-            key: 'explosion',
-            frames: this.anims.generateFrameNumbers('explosion',
-                { start: 0, end: 6, first: 0 }),
+            key: 'surfer_idle_anim',
+            frames: this.anims.generateFrameNumbers('surfer',
+                { start: 0, end: 4, first: 0 }),
+            frameRate: 5,
+            repeat: Infinity
+        });
+
+        this.anims.create({
+            key: 'boat_crash_anim',
+            frames: this.anims.generateFrameNumbers('boat',
+                { start: 0, end: 3, first: 0 }),
             frameRate: 30
         });
 
-        // //spaceship aimation
         this.anims.create({
-            key: 'crash',
+            key: 'coconut_crash_anim',
+            frames: this.anims.generateFrameNumbers('coconut_crash',
+                { start: 0, end: 5, first: 0 }),
+            frameRate: 30
+        });
+
+        this.anims.create({
+            key: 'wood_crash_anim',
             frames: this.anims.generateFrameNumbers('wood_crash',
                 { start: 0, end: 5, first: 0 }),
             frameRate: 20,
@@ -108,19 +131,14 @@ export default class PlayScene extends Phaser.Scene {
         this.add.text(this.gameSize.width / 2, this.gameSize.height / 2, 'GAME OVER', scoreConfig).setOrigin(0.5);
         this.add.text(this.gameSize.width / 2, this.gameSize.height / 2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5);
 
-
-
-
-        this.scoreLeft = this.add.text
-            (
+        this.scoreLeft = this.add.text(
                 this.gameSize.width / 2, // x-coord
                 54, // y-coord
                 "Score: " + score, // initial text
                 scoreConfig // config settings
             ).setOrigin(0.5, 0);
 
-        this.best = this.add.text
-            (
+        this.best = this.add.text(
                 this.gameSize.width / 2, // x-coord
                 108, // y coord
                 "Best: " + this.hScore, // initial text
@@ -136,6 +154,7 @@ export default class PlayScene extends Phaser.Scene {
 
     update() {
         this.oceanBackground.tilePositionX += this.game.worldSpeed;
+        if (this.game.loop.frame % 3 == 0) this.oceanBackground.tilePositionX += 128;
 
         // check key input for restart
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
@@ -153,14 +172,19 @@ export default class PlayScene extends Phaser.Scene {
             this.wave.update(this.game.loop.frame);
             this.player.update(this.wave.x);  // update surfer sprite
             if (this.player.x < -8) this.showGameOver();
+
+            this.game.worldSpeed = 25 * Math.log(this.scoreOverlay.doomLevel + 1);
+
             // update all obstacle sprites:
             for (let i = 0; i < this.obstacleGameObjects.length; i++) {
                 let obstacle = this.obstacleGameObjects[i];
                 obstacle.update(this.game.worldSpeed);
-                if (obstacle.x + 10 > this.wave.x) {
-                    obstacle.destroyed = true;
-                    obstacle.anims.play('crash');
-                }
+
+                // if (obstacle.x + 10 > this.wave.x) {
+                //     obstacle.destroyed = true;
+                //     obstacle.anims.play(obstacle.body.label + "_crash_anim");
+                // }
+
                 if (obstacle.done == true) obstacle.reset(Math.random() * this.gameSize.height);
             }
             this.scoreOverlay.incrementDoomLevel(0.4 / Math.abs(this.wave.x - this.player.x))
@@ -172,7 +196,7 @@ export default class PlayScene extends Phaser.Scene {
             let obstacle = this.obstacleGameObjects[i];
             if (obstacle.body.label == label && obstacle.destroyed == false) {
                 obstacle.destroyed = true;
-                obstacle.anims.play('crash');
+                obstacle.anims.play(obstacle.body.label + "_crash_anim");
 
                 // obstacle.body.se
                 obstacle.on('animationcomplete', () => {    // callback after anim completes

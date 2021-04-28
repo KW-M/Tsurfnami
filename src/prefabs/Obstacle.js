@@ -21,7 +21,6 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
     }
 
     reset(y) {
-        this.set
         this.x = this.scene.gameSize.width + (this.width / 2);
             this.y = y;
         this.setFrame(0)
