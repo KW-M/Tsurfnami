@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 export default class Obstacle extends Phaser.Physics.Matter.Sprite {
-    constructor(scene, size, texture, label) {
+    constructor(scene, label, texture, weight, size,) {
         // Start offscreen (-100,-100)
         super(scene.matter.world, -100, -100, texture, null, {
             // shape: 'circle',
@@ -13,7 +13,7 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
         this.setSensor(false);
         this.setRectangle(size, size)
         this.body.label = label;
-
+        this.depth = 3;
         this.done = false;
         this.destroyed = false;
         this.size = size // pixels per frame
@@ -31,6 +31,14 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
 
     hit() {
         this.reset();
+    }
+
+    playDestroyAnim() {
+        this.destroyed = true;
+        this.anims.play(this.body.label + "_crash_anim");
+        this.on('animationcomplete', () => {    // callback after anim completes
+            this.done = true;   // set the done flag so the play scene can clean up / delete this obstacle
+        });
     }
 
     update(speed) {

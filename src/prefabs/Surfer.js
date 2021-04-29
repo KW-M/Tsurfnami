@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 export default class Surfer extends Phaser.Physics.Matter.Sprite {
     constructor(scene, x, y) {
+        console.log("surfer spawn")
         super(scene.matter.world, x, y, "surfer", null,
             {
                 // 'vertices': [{ "x": 60, "y": 6 }, { "x": 78, "y": 48 }, { "x": 60, "y": 106 }, { "x": 43, "y": 48 }]// An array, or an array of arrays, containing the vertex data in x/y object pairs
@@ -9,11 +10,15 @@ export default class Surfer extends Phaser.Physics.Matter.Sprite {
         );
         scene.add.existing(this);   // add to existing scene
         this.setRectangle(75, 20);
+        this.setOrigin(0.5, 0.7)
         this.setFixedRotation(true);
         this.setSensor(true);
         this.setFriction(1)
-        this.anims.play('surfer_idle_anim')
-        this.setOrigin(0.65, 0.7)
+        this.body.label = "surfer"
+        this.setFrame(0)
+        this.isJumping = false;
+        this.depth = 4;
+
         // var spriteBody = Phaser.Physics.Matter.PhysicsJSONParser.rectangle(0, 0, 25, 100)
         // this.setExistingBody(spriteBody)
 
@@ -32,17 +37,22 @@ export default class Surfer extends Phaser.Physics.Matter.Sprite {
             this.targetLocationX = pointer.x
             this.targetLocationY = pointer.y
         }, this);
+        let debugRecta = this.scene.add.rectangle(3, 3, 3, 3, 0xFF00FF)
+        this.debugRectb = this.scene.add.rectangle(3, 3, 3, 3, 0xFFFF0c)
 
-        window.addEventListener("deviceorientation", function (e) {
+        // handle tilting of device;
+        window.addEventListener("deviceorientation", (e) => {
             var x = Math.floor(e.gamma);
             var y = Math.floor(e.beta);
-            document.getElementById("credits_link").innerText = "X: " + x + ",Y: " + y
             this.targetLocationX = this.x + x * 10;
             this.targetLocationY = this.y + y * 10;
+            document.getElementById("credits_link").innerText = "X: " + this.targetLocationX + ",Y: " + y
+
+            debugRecta.setPosition(this.targetLocationX, this.targetLocationY)
         }, true);
     }
 
-    update(waveXPos) {
+    update(waveXPos, worldSpeed) {
         if (this.x < -20) return;
         let forceX = 0.0001;
         let forceY = 0;
@@ -71,36 +81,29 @@ export default class Surfer extends Phaser.Physics.Matter.Sprite {
         let xDelta = Phaser.Math.Clamp(this.targetLocationX - this.x, 0, 100)
         let yDelta = Phaser.Math.Clamp((this.targetLocationY - this.y) / 50, -this.movementSpeed, this.movementSpeed)
 
-        // change surfer direction angle
-        this.setAngle(yDelta * 1.5)
-        // if (yDelta > 0.5)
-        //     this.setAngle(10)
-        // else if (yDelta < -0.5)
-        //     this.setAngle(-10)
-        // else {
-        //     console.log(yDelta)
-        //     this.setAngle(0)
-        // }
+        this.debugRectb.setPosition(this.targetLocationX, this.targetLocationY)
+
+        // jump button
+        if ((this.scene.input.activePointer.leftButtonDown() || Phaser.Input.Keyboard.JustDown(keySPACE)) && !this.isJumping) {
+            this.isJumping = true;
+            this.setAngle(this.angle + 20)
+        }
+
+        // if jumping, spin..
+        if (this.isJumping) {
+            if (this.angle > -10 && this.angle < 10) { this.setAngle(0); this.isJumping = false }
+            else this.setAngle(this.angle + 10)
+        } else {
+            // change surfer direction angle
+            this.setAngle(yDelta * 1.5)
+        }
 
         forceX += xDelta * 0.00008;
         forceY += yDelta * 0.0008;
         if (this.collidingWith != null) forceX -= 0.1;
         this.applyForce(new Phaser.Math.Vector2(forceX, forceY))
 
-
-
-        // jump button
-        if ((this.scene.input.activePointer.leftButtonReleased() || Phaser.Input.Keyboard.JustDown(keySPACE)) && !this.isJumping) {
-            this.isJumping = true;
-        }
-
-        // if jumping, spin..
-        if (this.isJumping) {
-            // if (this.angle == -10) { this.setAngle(0); this.isJumping = false }
-            // else this.setAngle(this.angle + 10)
-        }
-
-        let maxVelocity = 6
+        let maxVelocity = 6 + worldSpeed / 10
         // let velocityVector = new Phaser.Math.Vector2(this.body.velocity);
         let xVelocity = Phaser.Math.Clamp(this.body.velocity.x, -maxVelocity, maxVelocity)
         let yVelocity = Phaser.Math.Clamp(this.body.velocity.y, -maxVelocity, maxVelocity)

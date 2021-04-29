@@ -5,10 +5,15 @@ export default class Wave extends Phaser.GameObjects.TileSprite {
         this.setOrigin(0.5, 0)
         this.origninalX = scene.gameSize.width / 3
     }
+
     addForground() {
-        this.waveForeground = this.scene.add.tileSprite(this.origninalX, 0, 152, this.scene.gameSize.height, 'wave_foreground').setOrigin(0.5, 0)
-        this.waveShade = this.scene.add.rectangle(0, 0, this.origninalX, this.scene.gameSize.height, 0x00b0ff).setOrigin(0, 0)
+        this.waveForeground = this.scene.add.tileSprite(this.origninalX, 0, 152, this.scene.gameSize.height, 'wave_foreground')
+        this.waveShade = this.scene.add.rectangle(0, 0, this.origninalX, this.scene.gameSize.height, 0x00b0ff)
+        this.waveForeground.setOrigin(0.5, 0)
+        this.waveShade.setOrigin(0, 0)
         this.waveShade.setAlpha(0.7)
+        this.waveShade.depth = 6;
+        this.waveForeground.depth = 5;
     }
 
     update(frameNum) {

@@ -16,7 +16,7 @@ export default class ScoreOverlay extends Phaser.GameObjects.GameObject {
             fontSize: "20px",
             backgroundColor: "#00b0ff85",
             color: "#FFFFFF",
-            align: "center",
+            align: "right",
             fixedWidth: 0,
             padding: { top: 5, bottom: 5, left: 5, right: 5 },
         };
@@ -28,6 +28,7 @@ export default class ScoreOverlay extends Phaser.GameObjects.GameObject {
             this.formatTime(this.clock), // text to display
             this.textConfig // text style config object
         );
+        this.clockText.depth = 20;
 
         // add the event to increment the clock;
         this.timedEvent = this.scene.time.addEvent({
@@ -43,25 +44,32 @@ export default class ScoreOverlay extends Phaser.GameObjects.GameObject {
         this.doomText = this.scene.add.text(
             62,
             0,
-            "DOOM: 0/100",
+            "Speed 6",
             this.textConfig
         )
+        this.doomText.depth = 18;
+        // this.doomText.depth = 2;
 
         this.resize(this.scene.gameSize)
+    }
+
+    getSpeedValue() {
+        return 25 * Math.log(this.doomLevel / 2 + 1);
     }
 
     resize(gameSize) {
         let fullWidth = gameSize.width - 62;
         this.doomText.setStyle(Object.assign({}, this.textConfig, {
-            fixedWidth: fullWidth
+            fixedWidth: Math.max(fullWidth * (this.getSpeedValue() / 50), 120),
+            backgroundColor: "#FF000085",
         }))
-        this.doomBar.width = fullWidth * (this.doomLevel / 100)
+        // this.doomBar.width = fullWidth * (this.doomLevel / 100)
     }
 
     incrementDoomLevel(doomLevelInc) {
         this.doomLevel += doomLevelInc;
         this.doomLevel = Phaser.Math.Clamp(this.doomLevel, 1, 100);
-        this.doomText.text = "DOOM: " + Math.floor(this.doomLevel) + "/100" + "Sppeeeed: " + 25 * Math.log(this.doomLevel + 1);
+        this.doomText.text = "Rad lvl " + Math.floor(this.getSpeedValue());
         this.resize(this.scene.gameSize)
     }
 
