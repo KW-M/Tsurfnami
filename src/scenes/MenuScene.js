@@ -18,8 +18,8 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5);
 
     this.input.on('pointerup', () => {
-      this.scene.stop('MenuScene')
-      this.scene.start('PlayScene')
+      this.scene.stop('menuScene')
+      this.scene.start('playScene')
     });
   }
 }

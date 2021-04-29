@@ -29,7 +29,7 @@ export default class PlayScene extends Phaser.Scene {
         window.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 
         let music = this.sound.add('soundtrack', { loop: true });
-        // music.play();
+        music.play();
 
         //Setup Animations
         this.anims.create({
@@ -135,7 +135,7 @@ export default class PlayScene extends Phaser.Scene {
             if (collideBodyLabel == 'shark') { this.showGameOver(); return; }
             this.player.collidingWith = collideBodyLabel;
             this.destroyObstacleByBody((event.bodyA.label == "surfer") ? event.bodyB : event.bodyA);
-            // this.sound.play('sfx_explosion');
+            this.sound.play('sfx_explosion');
         })
         this.player.setOnCollideEnd((event) => {
             let collideBodyLabel = (event.bodyA.label == "surfer") ? event.bodyB.label : event.bodyA.label;
@@ -213,19 +213,23 @@ export default class PlayScene extends Phaser.Scene {
         this.oceanBackground.tilePositionX += this.worldSpeed;
         if (this.game.loop.frame % 3 == 0) this.oceanBackground.tilePositionX += 128; // every 3rd frame make the tilesprite jump by 128 px (1 frame width) so it appears to animate
 
-        // check key input for restart
-        if (Phaser.Input.Keyboard.JustDown(keyR) || this.input.activePointer.isDown) {
-            // this.scene.stop();
-            // this.game.scene.start("loadingScene")
-            // // this.scene.remove();
-            window.location.reload();
-        }
+
 
         // when game is over, don't do anything, just check for input.
         if (this.gameOver) {
+                    // check key input for restart
+        if (Phaser.Input.Keyboard.JustDown(keyR) || this.input.activePointer.isDown) {
+            this.registry.destroy();
+            this.events.off();
+            this.scene.restart();
+            this.gameOver = false;
+            // window.location.reload();
+        }
+
             if (Phaser.Input.Keyboard.JustDown(keyLEFT)) {
                 this.scene.start("menuScene");
-                this.scene.remove();
+                // this.scene.remove();
+                this.gameOver = false;
             }
             return; // return here just ends the update function early.
         }
@@ -247,7 +251,7 @@ export default class PlayScene extends Phaser.Scene {
             }
 
             // if (obstacle.x + 10 < this.wave.x) obstacle.playDestroyAnim()
-            if (this.game.loop.frame > this.nextSpawnTime && this.obstacleGameObjects.length < 10) {
+            if (this.game.loop.frame > this.nextSpawnTime && this.obstacleGameObjects.length < this.scoreOverlay.doomLevel * 10 + 6) {
                 this.nextSpawnTime = this.game.loop.frame + 5 * Math.random();
                 this.obstacleGameObjects.push(this.spawnRandomObstacle())
             }
