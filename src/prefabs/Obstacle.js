@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 export default class Obstacle extends Phaser.Physics.Matter.Sprite {
-    constructor(scene, label, texture, weight, size,) {
+    constructor(scene, label, texture, weight, hitboxHeight, hitboxWidth) {
         // Start offscreen (-100,-100)
         super(scene.matter.world, -100, -100, texture, null, {
             // shape: 'circle',
@@ -11,32 +11,24 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
         this.setOrigin(0.5, 0.5);
         this.setStatic(false);
         this.setSensor(false);
-        this.setRectangle(size, size)
+        this.setRectangle(hitboxWidth, hitboxHeight)
         this.body.label = label;
         this.depth = 3;
         this.done = false;
         this.destroyed = false;
-        this.size = size // pixels per frame
+        // this.size = size // pixels per frame
         // this.anims.play(texture + '_anim');
 
     }
 
     reset(y) {
-        if (this.body.label == 'shark') this.anims.play('shark_idle_anim')
         if (this.body.label == 'shark') this.x = 0;
-        else {
-            this.x = this.scene.gameSize.width + (this.width / 2);
-        }
+        else this.x = this.scene.gameSize.width + (this.width / 2);
         this.y = y;
         this.setFrame(0)
         this.done = false;
         this.destroyed = false;
         return this;
-
-    }
-
-    hit() {
-        this.reset();
     }
 
     playDestroyAnim() {
@@ -48,7 +40,6 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
     }
 
     update(speed) {
-
         if (this.x < -this.width) {
             this.done = true;
         } else if (this.body.label == 'shark')

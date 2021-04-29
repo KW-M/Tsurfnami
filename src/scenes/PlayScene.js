@@ -3,6 +3,7 @@ import ScoreOverlay from "/src/prefabs/scoreOverlay"
 import Obstacle from "/src/prefabs/obstacle"
 import Surfer from "/src/prefabs/Surfer"
 import Wave from "/src/prefabs/Wave"
+import CornerButton from "/src/prefabs/CornerButton"
 
 export default class PlayScene extends Phaser.Scene {
     constructor() {
@@ -28,15 +29,15 @@ export default class PlayScene extends Phaser.Scene {
         window.keyUP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         window.keyDOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 
-        let music = this.sound.add('soundtrack', { loop: true });
-        music.play();
+        this.music = this.sound.add('soundtrack', { loop: true });
+        this.music.play();
 
         //Setup Animations
         this.anims.create({
             key: 'surfer_idle_anim',
             frames: this.anims.generateFrameNumbers('surfer',
                 { start: 0, end: 3, first: 0 }),
-            frameRate: 5,
+            frameRate: 4,
             repeat: Infinity
         });
 
@@ -45,8 +46,8 @@ export default class PlayScene extends Phaser.Scene {
             key: 'shark_idle_anim',
             frames: this.anims.generateFrameNumbers('shark',
                 { start: 0, end: 2, first: 0 }),
-            frameRate: 30,
-            repeat: 0
+            frameRate: 4,
+            repeat: Infinity
         });
 
 
@@ -54,7 +55,7 @@ export default class PlayScene extends Phaser.Scene {
             key: 'boat_crash_anim',
             frames: this.anims.generateFrameNumbers('boat',
                 { start: 0, end: 3, first: 0 }),
-            frameRate: 30,
+            frameRate: 10,
             repeat: 0
         });
 
@@ -62,7 +63,7 @@ export default class PlayScene extends Phaser.Scene {
             key: 'stone_crash_anim',
             frames: this.anims.generateFrameNumbers('stone_crash',
                 { start: 0, end: 3, first: 0 }),
-            frameRate: 30,
+            frameRate: 10,
             repeat: 0
         });
 
@@ -70,7 +71,7 @@ export default class PlayScene extends Phaser.Scene {
             key: 'coconut_crash_anim',
             frames: this.anims.generateFrameNumbers('coconut_crash',
                 { start: 0, end: 5, first: 0 }),
-            frameRate: 30,
+            frameRate: 10,
             repeat: 0
         });
 
@@ -78,7 +79,7 @@ export default class PlayScene extends Phaser.Scene {
             key: 'wood_crash_anim',
             frames: this.anims.generateFrameNumbers('wood_crash',
                 { start: 0, end: 5, first: 0 }),
-            frameRate: 20,
+            frameRate: 10,
             repeat: 0
         });
 
@@ -87,26 +88,37 @@ export default class PlayScene extends Phaser.Scene {
             {
                 'label': 'coconut',
                 'sprite': 'coconut_crash',
-                'hitboxSize': 20,
-                'weight': 1,
+                'hitboxHeight': 20,
+                'hitboxWidth': 35,
+                'weight': 1.3,
             },
             {
                 'label': 'wood',
                 'sprite': 'wood_crash',
-                'hitboxSize': 35,
+                'hitboxHeight': 30,
+                'hitboxWidth': 40,
                 'weight': 1.5,
             },
             {
                 'label': 'stone',
                 'sprite': 'stone_crash',
-                'hitboxSize': 25,
+                'hitboxHeight': 25,
+                'hitboxWidth': 25,
+                'weight': 2,
+            },
+            {
+                'label': 'boat',
+                'sprite': 'boat',
+                'hitboxHeight': 25,
+                'hitboxWidth': 53,
                 'weight': 2.5,
             },
             {
                 'label': 'shark',
                 'sprite': 'shark',
-                'hitboxSize': 25,
-                'weight': 2.5,
+                'hitboxHeight': 32,
+                'hitboxWidth': 82,
+                'weight': 2.7,
             },
         ]
 
@@ -122,6 +134,7 @@ export default class PlayScene extends Phaser.Scene {
         // Place wave in two parts, background & foreground
         this.wave = new Wave(this, this.gameSize.width / 3, this.gameSize.height);
         this.wave.addForground();
+        this.wave.update(this.game.loop.frame)
 
         // add player (surfer)
         this.player = new Surfer(this, this.wave.x + 90, this.gameSize.height / 2);
@@ -130,19 +143,21 @@ export default class PlayScene extends Phaser.Scene {
             //this weird syntax is an if statement on a single line: if event.bodyA.label == "surfer" then collideBodyLabel = event.bodyB.label else collideBodyLabel = event.bodyA.label
             let collideBodyLabel = (event.bodyA.label == "surfer") ? event.bodyB.label : event.bodyA.label;
             console.log("colision!", collideBodyLabel, event)
-            if (window.navigator && window.navigator.vibrate != undefined) window.navigator.vibrate(100);
-            this.scoreOverlay.incrementDoomLevel(-5)
             if (collideBodyLabel == 'shark') { this.showGameOver(); return; }
-            this.player.collidingWith = collideBodyLabel;
-            this.destroyObstacleByBody((event.bodyA.label == "surfer") ? event.bodyB : event.bodyA);
-            this.sound.play('sfx_explosion');
+            let didFindObstacle = this.destroyObstacleByBody((event.bodyA.label == "surfer") ? event.bodyB : event.bodyA);
+            if (didFindObstacle == true) {
+                this.player.collidingWith = collideBodyLabel;
+                this.sound.play('sfx_explosion');
+                if (window.navigator && window.navigator.vibrate != undefined) window.navigator.vibrate(100);
+                this.scoreOverlay.incrementDoomLevel(-5)
+            }
         })
-        this.player.setOnCollideEnd((event) => {
-            let collideBodyLabel = (event.bodyA.label == "surfer") ? event.bodyB.label : event.bodyA.label;
-            console.log("colision end!", collideBodyLabel, "Last collding with: " + this.player.collidingWith)
-            if (collideBodyLabel == this.player.collidingWith)
-                this.player.collidingWith = null;
-        })
+        // this.player.setOnCollideEnd((event) => {
+        //     let collideBodyLabel = (event.bodyA.label == "surfer") ? event.bodyB.label : event.bodyA.label;
+        //     console.log("colision end!", collideBodyLabel, "Last collding with: " + this.player.collidingWith)
+        //     if (collideBodyLabel == this.player.collidingWith)
+        //         this.player.collidingWith = null;
+        // })
 
         // high score is saved across games played
         this.hScore = localStorage.getItem("score") || 0;
@@ -150,10 +165,18 @@ export default class PlayScene extends Phaser.Scene {
         // Add the score overlay (Clock + Doom bar stuff)
         this.scoreOverlay = new ScoreOverlay(this)
 
+        this.scale.on('enterfullscreen', function () { window.resize() });
+        this.fullscreenButton = new CornerButton(this, "top-right", 120, "⤢")
+        this.fullscreenButton.on("pointerup", () => {
+            console.log('fulcreen button opressed')
+            this.scale.toggleFullscreen();
+        })
+
         // handle when the screen size changes (device rotated, window resized, etc...)
         this.scale.on('resize', (gameSize, baseSize, displaySize, resolution) => {
             this.gameSize = gameSize;
             this.wave.resize(gameSize)
+            this.fullscreenButton.resize(gameSize)
             this.scoreOverlay.resize(gameSize)
             this.oceanBackground.height = this.gameSize.height
             this.oceanBackground.width = this.gameSize.width;
@@ -162,9 +185,15 @@ export default class PlayScene extends Phaser.Scene {
 
     spawnRandomObstacle() {
         this.obstacleLabelCounter += 1;
-        let newObstacleIndex = Math.floor(Math.random() * this.avalableObstacles.length);
-        let opts = this.avalableObstacles[newObstacleIndex];
-        return new Obstacle(this, opts.label, opts.sprite, opts.weight, opts.hitboxSize).reset(Math.random() * this.gameSize.height);
+        let opts;
+        while (true) {
+            let newObstacleIndex = Math.floor(Math.random() * this.avalableObstacles.length);
+            opts = this.avalableObstacles[newObstacleIndex];
+            if (Math.random() * 3 < (3 - opts.weight)) break;
+        }
+        let the_new_obstacle = new Obstacle(this, opts.label, opts.sprite, opts.weight, opts.hitboxHeight, opts.hitboxWidth).reset(Math.random() * this.gameSize.height);
+        if (opts.label == 'shark') the_new_obstacle.anims.play('shark_idle_anim')
+        return the_new_obstacle;
     }
 
     showGameOver() {
@@ -179,7 +208,7 @@ export default class PlayScene extends Phaser.Scene {
             align: "left",
             padding: { top: 20, bottom: 20, left: 20, right: 20 },
         };
-        let score = this.scoreOverlay.clock
+        let score = Math.floor(this.scoreOverlay.clock * this.scoreOverlay.doomLevel / 100)
         this.add.text(this.gameSize.width / 2, this.gameSize.height / 2, 'GAME OVER', scoreConfig).setOrigin(0.5).depth = 30;
         this.add.text(this.gameSize.width / 2, this.gameSize.height / 2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5).depth = 30;
 
@@ -207,28 +236,29 @@ export default class PlayScene extends Phaser.Scene {
     update() {
         // update the worldspeed based on the doom level variable in the scoreOverlay.
         // Original Formula: 25 * Math.log(this.scoreOverlay.doomLevel + 1);
-        this.worldSpeed = 25 * Math.log(this.scoreOverlay.doomLevel / 2 + 1);
+        this.worldSpeed = 25 * Math.log(this.scoreOverlay.doomLevel / 2 + 1) / 2;
 
         // move the ocean background tile sprite
         this.oceanBackground.tilePositionX += this.worldSpeed;
-        if (this.game.loop.frame % 3 == 0) this.oceanBackground.tilePositionX += 128; // every 3rd frame make the tilesprite jump by 128 px (1 frame width) so it appears to animate
-
-
+        if (this.game.loop.frame % 6 == 0) this.oceanBackground.tilePositionX += 128; // every 3rd frame make the tilesprite jump by 128 px (1 frame width) so it appears to animate
 
         // when game is over, don't do anything, just check for input.
         if (this.gameOver) {
-                    // check key input for restart
-        if (Phaser.Input.Keyboard.JustDown(keyR) || this.input.activePointer.isDown) {
-            this.registry.destroy();
-            this.events.off();
-            this.scene.restart();
-            this.gameOver = false;
-            // window.location.reload();
-        }
+            // check key input for restart
+            if (Phaser.Input.Keyboard.JustDown(keyR) || this.input.activePointer.isDown) {
+                this.registry.destroy();
+                this.events.off();
+                this.music.destroy();
+                this.scene.restart();
+                this.gameOver = false;
+            }
 
             if (Phaser.Input.Keyboard.JustDown(keyLEFT)) {
                 this.scene.start("menuScene");
-                // this.scene.remove();
+                this.registry.destroy();
+                this.events.off();
+                this.music.destroy();
+                this.scene.remove();
                 this.gameOver = false;
             }
             return; // return here just ends the update function early.
@@ -250,9 +280,11 @@ export default class PlayScene extends Phaser.Scene {
                 obstacle.destroy();
             }
 
+            let maxObstacles = this.scoreOverlay.doomLevel * (this.gameSize.height / 100) + 6
+
             // if (obstacle.x + 10 < this.wave.x) obstacle.playDestroyAnim()
-            if (this.game.loop.frame > this.nextSpawnTime && this.obstacleGameObjects.length < this.scoreOverlay.doomLevel * 10 + 6) {
-                this.nextSpawnTime = this.game.loop.frame + 5 * Math.random();
+            if (this.game.loop.frame > this.nextSpawnTime && this.obstacleGameObjects.length < maxObstacles) {
+                this.nextSpawnTime = this.game.loop.frame + 14 * Math.random();
                 this.obstacleGameObjects.push(this.spawnRandomObstacle())
             }
         }
@@ -261,12 +293,15 @@ export default class PlayScene extends Phaser.Scene {
     }
 
     destroyObstacleByBody(collisionBody) {
-        console.log("Destoring Obstacle", collisionBody)
         for (let i = 0; i < this.obstacleGameObjects.length; i++) {
             let obstacle = this.obstacleGameObjects[i];
-            if (obstacle.body == collisionBody && obstacle.destroyed == false) {
-                console.log("Destoring Obstacle Finally", collisionBody)
-                obstacle.playDestroyAnim()
+            if (obstacle.body == collisionBody) {
+                if (obstacle.destroyed == false) {
+                    obstacle.playDestroyAnim()
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
     }

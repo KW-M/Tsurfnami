@@ -3,7 +3,7 @@ export default class Wave extends Phaser.GameObjects.TileSprite {
         super(scene, scene.gameSize.width / 3, 0, 152, scene.gameSize.height, "wave_background")
         scene.add.existing(this);   // add to existing scene
         this.setOrigin(0.5, 0)
-        this.origninalX = scene.gameSize.width / 3
+        this.origninalX = scene.gameSize.width * (4 / 10)
     }
 
     addForground() {
@@ -18,8 +18,8 @@ export default class Wave extends Phaser.GameObjects.TileSprite {
 
     update(frameNum) {
         // Move Wave Forwards & Backwards
-        this.x = this.origninalX + Math.sin(Math.sin(frameNum / 700) * 30) * 100;
-        if (frameNum % 2 == 0) this.waveForeground.tilePositionY += 128
+        this.x = this.origninalX + Math.sin(Math.sin(frameNum / (1.3 * this.scene.gameSize.width)) * 30) * this.scene.gameSize.width / 6;
+        if (frameNum % 4 == 0) this.waveForeground.tilePositionY += 128
         this.waveForeground.x = this.x;
         this.waveShade.width = this.x - 18;
     }
