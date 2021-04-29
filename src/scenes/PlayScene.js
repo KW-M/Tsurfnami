@@ -165,10 +165,9 @@ export default class PlayScene extends Phaser.Scene {
         // Add the score overlay (Clock + Doom bar stuff)
         this.scoreOverlay = new ScoreOverlay(this)
 
-        this.scale.on('enterfullscreen', function () { window.resize() });
+        // add fullscreen button
         this.fullscreenButton = new CornerButton(this, "top-right", 120, "⤢")
         this.fullscreenButton.on("pointerup", () => {
-            console.log('fulcreen button opressed')
             this.scale.toggleFullscreen();
         })
 
@@ -277,19 +276,24 @@ export default class PlayScene extends Phaser.Scene {
             obstacle.update(this.worldSpeed);
             if (obstacle.done == true) {
                 this.obstacleGameObjects.splice(i, 1) // delete the obstacle from the array of game objects;
+                i--;
                 obstacle.destroy();
+                continue;
             }
 
-            let maxObstacles = this.scoreOverlay.doomLevel * (this.gameSize.height / 100) + 6
+            // Destroy obstacles as they go past the wave
+            if (obstacle.x < this.wave.x && obstacle.destroyed != true && obstacle.body.label != 'shark') obstacle.playDestroyAnim()
 
-            // if (obstacle.x + 10 < this.wave.x) obstacle.playDestroyAnim()
+            // Spawn obstacles as they go out of frame
+            let maxObstacles = this.scoreOverlay.doomLevel * (this.gameSize.height / 100) + 6
             if (this.game.loop.frame > this.nextSpawnTime && this.obstacleGameObjects.length < maxObstacles) {
-                this.nextSpawnTime = this.game.loop.frame + 14 * Math.random();
+                this.nextSpawnTime = this.game.loop.frame + 2 * Math.random() + Math.floor(30 / this.worldSpeed);
                 this.obstacleGameObjects.push(this.spawnRandomObstacle())
             }
         }
 
-        this.scoreOverlay.incrementDoomLevel(Math.min(0.4 / Math.abs(this.wave.x - this.player.x), 0.1));
+        let jumpBonus = this.player.isJumping ? 0.05 : 0;
+        this.scoreOverlay.incrementDoomLevel(Math.min(0.4 / Math.abs(this.wave.x - this.player.x) + jumpBonus, 0.1));
     }
 
     destroyObstacleByBody(collisionBody) {

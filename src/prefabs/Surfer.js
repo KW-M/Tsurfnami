@@ -123,7 +123,7 @@ export default class Surfer extends Phaser.Physics.Matter.Sprite {
         forceX += xDelta * 0.00008;
         forceY += yDelta * 0.0008;
         if (this.collidingWith != null) forceX -= 0.1;
-        this.collidingWith == null;
+        this.collidingWith = null;
         this.applyForce(new Phaser.Math.Vector2(forceX, forceY))
 
         let maxVelocity = 6 + worldSpeed / 10

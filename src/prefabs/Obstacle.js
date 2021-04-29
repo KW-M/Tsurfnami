@@ -14,6 +14,7 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
         this.setRectangle(hitboxWidth, hitboxHeight)
         this.body.label = label;
         this.depth = 3;
+        this.setAngularVelocity(.05)
         this.done = false;
         this.destroyed = false;
         // this.size = size // pixels per frame
