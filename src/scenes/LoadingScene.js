@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 
 import images_key_bg from 'url:/assets/Key_BG.png';
+import images_shark from 'url:/assets/shark.png';
 import images_stone_crash from 'url:/assets/stone_crash.png';
 import images_coconut_crash from 'url:/assets/coconut_crash.png';
 import images_wood_crash from 'url:/assets/wood_crash.png';
@@ -35,6 +36,8 @@ export default class LoadingScene extends Phaser.Scene {
 
       // Obstacle Images:
       this.load.image('rocket', images_rocket);
+      this.load.spritesheet('shark', images_shark,
+        { frameWidth: 128, frameHeight: 71, startFrame: 0, endFrame: 2 });
       this.load.spritesheet('wood_crash', images_wood_crash,
         { frameWidth: 120, frameHeight: 120, startFrame: 0, endFrame: 5 });
       this.load.spritesheet('coconut_crash', images_coconut_crash,

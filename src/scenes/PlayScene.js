@@ -40,6 +40,16 @@ export default class PlayScene extends Phaser.Scene {
             repeat: Infinity
         });
 
+
+        this.anims.create({
+            key: 'shark_idle_anim',
+            frames: this.anims.generateFrameNumbers('shark',
+                { start: 0, end: 2, first: 0 }),
+            frameRate: 30,
+            repeat: 0
+        });
+
+
         this.anims.create({
             key: 'boat_crash_anim',
             frames: this.anims.generateFrameNumbers('boat',
@@ -89,6 +99,12 @@ export default class PlayScene extends Phaser.Scene {
             {
                 'label': 'stone',
                 'sprite': 'stone_crash',
+                'hitboxSize': 25,
+                'weight': 2.5,
+            },
+            {
+                'label': 'shark',
+                'sprite': 'shark',
                 'hitboxSize': 25,
                 'weight': 2.5,
             },

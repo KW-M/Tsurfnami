@@ -18,15 +18,21 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
         this.destroyed = false;
         this.size = size // pixels per frame
         // this.anims.play(texture + '_anim');
+
     }
 
     reset(y) {
-        this.x = this.scene.gameSize.width + (this.width / 2);
-            this.y = y;
+        if (this.body.label == 'shark') this.anims.play('shark_idle_anim')
+        if (this.body.label == 'shark') this.x = 0;
+        else {
+            this.x = this.scene.gameSize.width + (this.width / 2);
+        }
+        this.y = y;
         this.setFrame(0)
         this.done = false;
         this.destroyed = false;
         return this;
+
     }
 
     hit() {
@@ -42,8 +48,12 @@ export default class Obstacle extends Phaser.Physics.Matter.Sprite {
     }
 
     update(speed) {
+
         if (this.x < -this.width) {
             this.done = true;
-        } else this.setVelocity(-speed, 0);// move sprite left
+        } else if (this.body.label == 'shark')
+            this.setVelocity(speed, 0);
+        else
+            this.setVelocity(-speed, 0);// move sprite left
     }
 }
