@@ -132,6 +132,7 @@ export default class PlayScene extends Phaser.Scene {
             console.log("colision!", collideBodyLabel, event)
             if (window.navigator && window.navigator.vibrate != undefined) window.navigator.vibrate(100);
             this.scoreOverlay.incrementDoomLevel(-5)
+            if (collideBodyLabel == 'shark') { this.showGameOver(); return; }
             this.player.collidingWith = collideBodyLabel;
             this.destroyObstacleByBody((event.bodyA.label == "surfer") ? event.bodyB : event.bodyA);
             // this.sound.play('sfx_explosion');
@@ -212,16 +213,16 @@ export default class PlayScene extends Phaser.Scene {
         this.oceanBackground.tilePositionX += this.worldSpeed;
         if (this.game.loop.frame % 3 == 0) this.oceanBackground.tilePositionX += 128; // every 3rd frame make the tilesprite jump by 128 px (1 frame width) so it appears to animate
 
+        // check key input for restart
+        if (Phaser.Input.Keyboard.JustDown(keyR) || this.input.activePointer.isDown) {
+            // this.scene.stop();
+            // this.game.scene.start("loadingScene")
+            // // this.scene.remove();
+            window.location.reload();
+        }
+
         // when game is over, don't do anything, just check for input.
         if (this.gameOver) {
-            // check key input for restart
-            if (Phaser.Input.Keyboard.JustDown(keyR) || this.input.activePointer.isDown) {
-                // this.scene.stop();
-                // this.game.scene.start("loadingScene")
-                // // this.scene.remove();
-                window.location.reload();
-
-            }
             if (Phaser.Input.Keyboard.JustDown(keyLEFT)) {
                 this.scene.start("menuScene");
                 this.scene.remove();
