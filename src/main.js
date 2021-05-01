@@ -57,3 +57,4 @@ if (module.hot) {
   module.hot.dispose(destroyGame);
   module.hot.accept(newGame);
 }
+
