@@ -1,3 +1,12 @@
+/*
+Tsurfnami
+A game by Asher Lachoff, Yukai Liu, Kelly Leung & Kyle Worcester-Moore
+May 2nd, 2021
+Multiple input methods + tilt on mobile.
+Realistic shark symulation(TM).
+Layered audio gives an imersive experience.
+*/
+
 
 import Phaser from 'phaser';
 import LoadingScene from "/src/scenes/loadingScene"
