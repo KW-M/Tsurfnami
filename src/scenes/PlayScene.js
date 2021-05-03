@@ -32,6 +32,9 @@ export default class PlayScene extends Phaser.Scene {
         this.music = this.sound.add('soundtrack', { loop: true });
         this.music.play();
 
+        this.wavesound = this.sound.add('wave_sound', { loop: true });
+        this.wavesound.play();
+
         //Setup Animations
         this.anims.create({
             key: 'surfer_idle_anim',
@@ -147,7 +150,7 @@ export default class PlayScene extends Phaser.Scene {
             let didFindObstacle = this.destroyObstacleByBody((event.bodyA.label == "surfer") ? event.bodyB : event.bodyA);
             if (didFindObstacle == true) {
                 this.player.collidingWith = collideBodyLabel;
-                this.sound.play('sfx_explosion');
+                this.sound.play('hit_sound');
                 if (window.navigator && window.navigator.vibrate != undefined) window.navigator.vibrate(100);
                 this.scoreOverlay.incrementDoomLevel(-5)
             }
@@ -185,6 +188,7 @@ export default class PlayScene extends Phaser.Scene {
     spawnRandomObstacle() {
         this.obstacleLabelCounter += 1;
         let opts;
+        // Make heavy obstacles less likely to spawn
         while (true) {
             let newObstacleIndex = Math.floor(Math.random() * this.avalableObstacles.length);
             opts = this.avalableObstacles[newObstacleIndex];
@@ -198,6 +202,9 @@ export default class PlayScene extends Phaser.Scene {
     showGameOver() {
         this.gameOver = true;
         this.time.removeAllEvents();
+
+        this.playRandomSoundFromList(['death_sound_1', 'death_sound_1'])
+
         // scores display configuration
         let scoreConfig = {
             fontFamily: "Courier",
@@ -208,8 +215,8 @@ export default class PlayScene extends Phaser.Scene {
             padding: { top: 20, bottom: 20, left: 20, right: 20 },
         };
         let score = Math.floor(this.scoreOverlay.clock * this.scoreOverlay.doomLevel / 100)
-        this.add.text(this.gameSize.width / 2, this.gameSize.height / 2, 'GAME OVER', scoreConfig).setOrigin(0.5).depth = 30;
-        this.add.text(this.gameSize.width / 2, this.gameSize.height / 2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5).depth = 30;
+        this.add.text(this.gameSize.width / 2, this.gameSize.height / 2, 'GAME OVER', scoreConfig).setOrigin(0.5);//.depth = 30;
+        this.add.text(this.gameSize.width / 2, this.gameSize.height / 2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5);//.depth = 30;
 
         // update the high score
         if (score > this.hScore) {
@@ -232,6 +239,11 @@ export default class PlayScene extends Phaser.Scene {
         ).setOrigin(0.5, 0);
     }
 
+    playRandomSoundFromList(sound_names) {
+        let sound_indx = Math.floor(Math.random() * sound_names.length)
+        this.sound.play(sound_names[sound_indx])
+    }
+
     update() {
         // update the worldspeed based on the doom level variable in the scoreOverlay.
         // Original Formula: 25 * Math.log(this.scoreOverlay.doomLevel + 1);
@@ -241,6 +253,7 @@ export default class PlayScene extends Phaser.Scene {
         this.oceanBackground.tilePositionX += this.worldSpeed;
         if (this.game.loop.frame % 6 == 0) this.oceanBackground.tilePositionX += 128; // every 3rd frame make the tilesprite jump by 128 px (1 frame width) so it appears to animate
 
+        this.wave.update(this.game.loop.frame);
         // when game is over, don't do anything, just check for input.
         if (this.gameOver) {
             // check key input for restart
@@ -263,8 +276,10 @@ export default class PlayScene extends Phaser.Scene {
             return; // return here just ends the update function early.
         }
 
+        if (this.game.loop.frame % 140 == 0)
+            this.playRandomSoundFromList(['idle_sound_1', 'idle_sound_2', 'idle_sound_3', 'idle_sound_4'])
+
         // update wave and player sprites
-        this.wave.update(this.game.loop.frame);
         this.player.update(this.wave.x, this.worldSpeed);  // update surfer sprite
         if (this.player.x < -8) this.showGameOver();
 
